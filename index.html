@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Urdu Number Converter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Nastaliq Urdu', serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 40px;
+        }
+        .input-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        input, button {
+            height: 45px; /* Ensures identical height */
+            padding: 0 15px;
+            font-size: 18px;
+            box-sizing: border-box; /* Includes padding and border in the total height/width */
+            vertical-align: middle;
+        }
+        input {
+            font-family: sans-serif;
+            direction: ltr;
+            text-align: left;
+            border: 1px solid #767676;
+            border-radius: 4px;
+            width: 300px;
+        }
+        button {
+            font-family: 'Noto Nastaliq Urdu', serif;
+            background-color: #efefef;
+            border: 1px solid #767676;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #e4e4e4;
+        }
+        #output {
+            margin-top: 20px;
+            font-size: 24px;
+            color: #222;
+            background: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            display: inline-block;
+            max-width: 90%;
+            line-height: 1.6;
+        }
+        #englishOutput {
+            margin-top: 20px;
+            font-size: 24px;
+            color: #222;
+            background: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            display: inline-block;
+            max-width: 90%;
+            line-height: 1.6;
+            direction: ltr;
+            text-align: left;
+            font-family: sans-serif;
+            font-weight: bold;
+        }
+        .urdu-comma, .english-comma {
+            color: #ff0000;
+            font-weight: bold;
+        }
+        .urdu-word, .english-word {
+            display: inline-block;
+            transition: text-shadow 0.3s ease;
+        }
+        .urdu-word:hover, .english-word:hover {
+            text-shadow: 
+                0 0 5px #ff0000,
+                0 0 10px #ff8800,
+                0 0 15px #ffff00,
+                0 0 20px #00ff00,
+                0 0 25px #00ffff,
+                0 0 30px #0088ff,
+                0 0 35px #0000ff,
+                0 0 40px #8800ff,
+                0 0 45px #ff00ff;
+        }
+    </style>
+</head>
+<body>
+
+<h1>نمبر کو اردو اور انگریزی میں تبدیل کریں</h1>
+
+<div class="input-group">
+    <button onclick="convertToUrdu()">تبدیل کریں</button>
+    <input type="text" id="numberInput" placeholder="Enter number..." maxlength="35" />
+</div>
+
+<br><br>
+
+<div id="output"></div>
+<br>
+<div id="englishOutput"></div>
+
+<script>
+    const urduNumbers = {
+        0: "صفر", 1: "ایک", 2: "دو", 3: "تین", 4: "چار", 5: "پانچ",
+        6: "چھے", 7: "سات", 8: "آٹھ", 9: "نو", 10: "دس",
+        11: "گیارہ", 12: "بارہ", 13: "تیرہ", 14: "چودہ", 15: "پندرہ",
+        16: "سولہ", 17: "سترہ", 18: "اٹھارہ", 19: "انیس", 20: "بیس",
+        21: "اکیس", 22: "بائیس", 23: "تئیس", 24: "چوبیس", 25: "پچیس",
+        26: "چھبیس", 27: "ستائیس", 28: "اٹھائیس", 29: "انتیس", 30: "تیس",
+        31: "اکتیس", 32: "بتیس", 33: "تینتیس", 34: "چونتیس", 35: "پینتیس",
+        36: "چھتیس", 37: "سنتیس", 38: "اڑتیس", 39: "انتالیس", 40: "چالیس",
+        41: "اکتالیس", 42: "بیالیس", 43: "تینتالیس", 44: "چونتالیس", 45: "پینتالیس",
+        46: "چھیالیس", 47: "سینتالیس", 48: "اڑتالیس", 49: "انچاس", 50: "پچاس",
+        51: "اکاون", 52: "باون", 53: "تریپن", 54: "چون", 55: "پچپن",
+        56: "چھپن", 57: "ستا ون", 58: "اٹھاون", 59: "انسٹھ", 60: "ساٹھ",
+        61: "اکسٹھ", 62: "باسٹھ", 63: "تریسٹھ", 64: "چونسٹھ", 65: "پینسٹھ",
+        66: "چھیاسٹھ", 67: "سڑسٹھ", 68: "اڑسٹھ", 69: "انہتر", 70: "ستر",
+        71: "اکہتر", 72: "بہتر", 73: "تہتر", 74: "چوہتر", 75: "پچھتر",
+        76: "چھہتر", 77: "ستتر", 78: "اٹھتر", 79: "انہتر", 80: "اسی",
+        81: "اکیاسی", 82: "بیاسی", 83: "تراسی", 84: "چوراسی", 85: "پچاسی",
+        86: "چھیاسی", 87: "ستاسی", 88: "اٹھاسی", 89: "نواسی", 90: "نوے",
+        91: "اکیانوے", 92: "بانوے", 93: "ترانوے", 94: "چورانوے", 95: "پچانوے",
+        96: "چھیانوے", 97: "ستانوے", 98: "اٹھانوے", 99: "ننانوے", 100: "ایک سو"
+    };
+
+    const urduUnits = {
+        "maha_singhar": "مہا سنگھار",
+        "singhar": "سنگھار",
+        "maha_shisht": "مہا ششت",
+        "shisht": "ششت",
+        "maha_ant": "مہا انت",
+        "ant": "انت",
+        "madhya": "مدھیا",
+        "jaladhi": "جلدهی",
+        "maha_shankh": "مہا شنکھ",
+        "shankh": "شنکھ",
+        "padam": "پدم",
+        "neel": "نیل",
+        "kharab": "کھرب",
+        "arab": "ارب",
+        "crore": "کروڑ",
+        "lakh": "لاکھ",
+        "thousand": "ہزار",
+        "hundred": "سو"
+    };
+
+    const unitValues = [
+        ["maha_singhar", 34],
+        ["singhar", 33],
+        ["maha_shisht", 31],
+        ["shisht", 29],
+        ["maha_ant", 27],
+        ["ant", 25],
+        ["madhya", 23],
+        ["jaladhi", 21],
+        ["maha_shankh", 19],
+        ["shankh", 17],
+        ["padam", 15],
+        ["neel", 13],
+        ["kharab", 11],
+        ["arab", 9],
+        ["crore", 7],
+        ["lakh", 5],
+        ["thousand", 3],
+        ["hundred", 2]
+    ];
+
+    function convertToUrdu() {
+        const inputStr = document.getElementById("numberInput").value.trim();
+        const output = document.getElementById("output");
+        const englishOutput = document.getElementById("englishOutput");
+
+        if (!/^\d+$/.test(inputStr)) {
+            output.textContent = "براہ کرم درست نمبر درج کریں۔";
+            englishOutput.textContent = "";
+            return;
+        }
+
+        if (inputStr.length > 35) {
+            output.textContent = "نمبر بہت بڑا ہے۔";
+            englishOutput.textContent = "";
+            return;
+        }
+
+        if (inputStr === "0" || /^0+$/.test(inputStr)) {
+            output.textContent = urduNumbers[0];
+            englishOutput.textContent = "Zero";
+            return;
+        }
+
+        let parts = [];
+        let remainingStr = inputStr;
+
+        for (const [unit, zeros] of unitValues) {
+            if (remainingStr.length <= zeros) continue;
+            const unitLength = remainingStr.length - zeros;
+            const unitPortion = remainingStr.substring(0, unitLength);
+            remainingStr = remainingStr.substring(unitLength);
+            const count = parseInt(unitPortion);
+            if (count > 0) {
+                const word = urduNumbers[count] || count.toString();
+                parts.push(`${word} ${urduUnits[unit]}`);
+            }
+        }
+
+        if (remainingStr && parseInt(remainingStr) > 0) {
+            const remainder = parseInt(remainingStr);
+            parts.push(urduNumbers[remainder] || remainder.toString());
+        }
+
+        const formattedParts = parts.map(part => {
+            const words = part.split(' ');
+            return words.map(word => `<span class="urdu-word">${word}</span>`).join(' ');
+        });
+
+        output.innerHTML = formattedParts.join('<span class="urdu-comma">، </span>');
+        englishOutput.innerHTML = numberToEnglishWords(inputStr);
+    }
+
+    function numberToEnglishWords(strNum) {
+        if (strNum === "0") return "Zero";
+        const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+        const teens = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen",
+                       "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+        const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+        const thousands = ["", "Thousand", "Million", "Billion", "Trillion", "Quadrillion", "Quintillion", "Sextillion", "Septillion", "Octillion", "Nonillion", "Decillion"];
+
+        function chunkToWords(num) {
+            let str = "";
+            if (num >= 100) {
+                str += ones[Math.floor(num / 100)] + " Hundred ";
+                num %= 100;
+            }
+            if (num >= 10 && num < 20) {
+                str += teens[num - 10] + " ";
+            } else {
+                if (num >= 20) {
+                    str += tens[Math.floor(num / 10)] + " ";
+                    num %= 10;
+                }
+                if (num > 0) {
+                    str += ones[num] + " ";
+                }
+            }
+            return str.trim();
+        }
+
+        let n = BigInt(strNum);
+        let parts = [];
+        let i = 0;
+
+        while (n > 0n) {
+            let chunk = Number(n % 1000n);
+            if (chunk !== 0) {
+                let chunkWord = chunkToWords(chunk);
+                let scaleWord = thousands[i] ? " " + thousands[i] : "";
+                
+                let fullChunkPhrase = chunkWord + scaleWord;
+                let wrappedPhrase = fullChunkPhrase.split(' ').map(w => `<span class="english-word">${w}</span>`).join(' ');
+                
+                parts.push(wrappedPhrase);
+            }
+            n = n / 1000n;
+            i++;
+        }
+
+        parts.reverse();
+        return parts.join('<span class="english-comma">, </span>');
+    }
+</script>
+
+</body>
+</html>
